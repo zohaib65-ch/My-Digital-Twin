@@ -111,6 +111,15 @@ export async function vectorSearch(
         `Please create the Vector Search index in MongoDB Atlas with 768 dimensions (cosine similarity). See README.md for instructions.`
       );
     }
+    if (
+      message.includes('SSL alert number 80') ||
+      message.includes('tlsv1 alert internal error') ||
+      message.includes('MongoServerSelectionError')
+    ) {
+      throw new Error(
+        `MongoDB connection blocked (SSL Alert 80 / TLS internal error). In MongoDB Atlas, go to "Network Access" and ensure you have added "0.0.0.0/0" (Allow Access from Anywhere) so your production server can connect.`
+      );
+    }
     throw error;
   }
 }

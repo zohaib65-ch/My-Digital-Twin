@@ -25,17 +25,26 @@ function getMongoURI(): string {
   return uri;
 }
 
+const mongoOptions = {
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 10000,
+  connectTimeoutMS: 10000,
+  socketTimeoutMS: 45000,
+};
+
 function getClient(): MongoClient {
   if (process.env.NODE_ENV === 'development') {
     // In dev, reuse the client across hot reloads
     if (!global._mongoClient) {
-      global._mongoClient = new MongoClient(getMongoURI());
+      global._mongoClient = new MongoClient(getMongoURI(), mongoOptions);
     }
     client = global._mongoClient;
   } else {
-    if (!client) {
-      client = new MongoClient(getMongoURI());
+    // In production / serverless, reuse client if available across invocations
+    if (!global._mongoClient) {
+      global._mongoClient = new MongoClient(getMongoURI(), mongoOptions);
     }
+    client = global._mongoClient;
   }
   return client;
 }

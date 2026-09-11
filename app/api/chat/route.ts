@@ -110,8 +110,16 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[Chat API Error]', error);
 
-    const message =
+    let message =
       error instanceof Error ? error.message : 'An unexpected error occurred.';
+
+    if (
+      message.includes('SSL alert number 80') ||
+      message.includes('tlsv1 alert internal error')
+    ) {
+      message =
+        'MongoDB Atlas blocked the connection (SSL Alert 80). In your MongoDB Atlas dashboard, go to "Network Access" and add "0.0.0.0/0" (Allow Access from Anywhere) so production deployments can connect.';
+    }
 
     return Response.json(
       { error: `Failed to process your question: ${message}` },
