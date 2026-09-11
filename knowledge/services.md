@@ -51,4 +51,4 @@ Muhammad Zohaib provides professional software engineering and web development s
 ## Engagement & Hiring Channels
 
 - **Fiverr (Direct Hire):** You can hire Muhammad Zohaib on Fiverr with buyer protection: [https://www.fiverr.com/s/lr9q0X7](https://www.fiverr.com/s/lr9q0X7)
-- **Direct Contracting / Full-Time Roles:** Reach out via email at **mzohaibch.07@gmail.com** or LinkedIn.
+- **Direct Contracting / Full-Time Roles:** Reach out via email at **mzohaibch.07@gmail.com** or LinkedIn ([https://www.linkedin.com/in/zohaibch07/](https://www.linkedin.com/in/zohaibch07/)).

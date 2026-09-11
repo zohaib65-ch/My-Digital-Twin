@@ -38,7 +38,7 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
           href={rawUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 px-2.5 py-0.5 my-0.5 rounded-lg bg-indigo-50/90 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-900 border border-indigo-200/70 font-semibold text-xs transition-all shadow-2xs hover:shadow-xs active:scale-[0.98] cursor-pointer align-baseline"
+          className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 my-0.5 rounded-lg bg-indigo-50/90 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-900 border border-indigo-200/70 font-semibold text-[11px] sm:text-xs transition-all shadow-2xs hover:shadow-xs active:scale-[0.98] cursor-pointer align-baseline"
         >
           <span>{parseInlineMarkdown(rawLabel)}</span>
           <ExternalLink className="w-3 h-3 opacity-70 inline flex-shrink-0" />
@@ -104,20 +104,20 @@ export function FormattedMessage({ content }: FormattedMessageProps) {
   const lines = content.split('\n');
 
   return (
-    <div className="space-y-2.5 text-[14.5px] leading-relaxed text-slate-800 font-normal">
+    <div className="space-y-2 sm:space-y-2.5 text-[13px] sm:text-[14.5px] leading-relaxed text-slate-800 font-normal">
       {lines.map((line, idx) => {
         const trimmed = line.trim();
 
         if (trimmed === '') {
-          return <div key={idx} className="h-2" />;
+          return <div key={idx} className="h-1.5 sm:h-2" />;
         }
 
         // Bullet point
         if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
           const bulletText = trimmed.slice(2);
           return (
-            <div key={idx} className="flex items-start gap-2.5 pl-1 my-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2.5 flex-shrink-0" />
+            <div key={idx} className="flex items-start gap-2 sm:gap-2.5 pl-0.5 sm:pl-1 my-1 sm:my-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2 sm:mt-2.5 flex-shrink-0" />
               <div className="flex-1 text-slate-800 leading-relaxed">{parseInlineMarkdown(bulletText)}</div>
             </div>
           );
@@ -129,8 +129,8 @@ export function FormattedMessage({ content }: FormattedMessageProps) {
           const num = numMatch[1];
           const itemText = numMatch[2];
           return (
-            <div key={idx} className="flex items-start gap-2.5 pl-1 my-1.5">
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-indigo-50 text-indigo-700 font-bold text-[11px] mt-0.5 flex-shrink-0 border border-indigo-200/60">
+            <div key={idx} className="flex items-start gap-2 sm:gap-2.5 pl-0.5 sm:pl-1 my-1 sm:my-1.5">
+              <span className="inline-flex items-center justify-center w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-md bg-indigo-50 text-indigo-700 font-bold text-[10px] sm:text-[11px] mt-0.5 flex-shrink-0 border border-indigo-200/60">
                 {num}
               </span>
               <div className="flex-1 text-slate-800 leading-relaxed">{parseInlineMarkdown(itemText)}</div>
@@ -141,14 +141,14 @@ export function FormattedMessage({ content }: FormattedMessageProps) {
         // Heading markdown
         if (trimmed.startsWith('### ')) {
           return (
-            <h4 key={idx} className="font-bold text-slate-950 text-sm mt-4 mb-1.5 tracking-tight">
+            <h4 key={idx} className="font-bold text-slate-950 text-[13px] sm:text-sm mt-3 sm:mt-4 mb-1 sm:mb-1.5 tracking-tight">
               {parseInlineMarkdown(trimmed.slice(4))}
             </h4>
           );
         }
         if (trimmed.startsWith('## ')) {
           return (
-            <h3 key={idx} className="font-bold text-slate-950 text-base mt-5 mb-2 tracking-tight">
+            <h3 key={idx} className="font-bold text-slate-950 text-[14px] sm:text-base mt-4 sm:mt-5 mb-1.5 sm:mb-2 tracking-tight">
               {parseInlineMarkdown(trimmed.slice(3))}
             </h3>
           );

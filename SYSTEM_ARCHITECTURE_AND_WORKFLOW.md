@@ -141,7 +141,7 @@ All data about Muhammad Zohaib resides in pure Markdown files inside the `knowle
 | `skills.md` | Core technical competencies (JavaScript, TypeScript, React, Vue.js, Node.js, Express, MongoDB, WebSockets, Tailwind CSS, AWS, Git). |
 | `experience.md` | Commercial roles at Sideline Technologies (PVT) LTD, Ropstam Solutions Inc., and international freelancing. |
 | `education.md` | University of Sahiwal, BS in Computer Software Engineering, 3.35 CGPA (Grade A). |
-| `contact.md` | Email (`mzohaibch.07@gmail.com`), WhatsApp (+92 3431197504), Fiverr link, GitHub, LinkedIn. |
+| `contact.md` | Email (`mzohaibch.07@gmail.com`), WhatsApp (+92 3431197504), Fiverr link, GitHub, LinkedIn (`https://www.linkedin.com/in/zohaibch07/`). |
 | `services.md` | Full-stack web development, MERN & Vue.js engineering, custom admin dashboards, WebSocket applications, and Fiverr hiring options. |
 | `faq.md` | Direct answers to top questions visitors frequently ask. |
 | `achievements.md` | Academic excellence, 5+ deployed dashboards, freelance delivery track record. |

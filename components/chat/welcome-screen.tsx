@@ -39,13 +39,17 @@ const PROMPT_CARDS = [
 
 export function WelcomeScreen({ onSuggestedQuestion }: WelcomeScreenProps) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[62vh] max-w-2xl mx-auto px-4 text-center animate-fade-in">
-      {/* ── Glowing Luxury Monogram Avatar ──────────────────── */}
+    <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-2xl mx-auto px-3 sm:px-4 text-center animate-fade-in pb-28 sm:pb-32">
+      {/* ── Glowing Luxury Profile Photo ──────────────────── */}
       <div className="relative mb-5">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-slate-950 via-indigo-950 to-indigo-900 flex items-center justify-center text-white font-extrabold text-xl shadow-xl shadow-indigo-500/20 ring-1 ring-white/20 animate-pulse-luxury">
-          MZ
+        <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl shadow-indigo-500/15 ring-2 ring-indigo-500/25 border-2 border-white">
+          <img
+            src="/zohaib.jpg"
+            alt="Muhammad Zohaib"
+            className="w-full h-full object-cover"
+          />
         </div>
-        <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center shadow-xs">
+        <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center shadow-xs">
           <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
         </div>
       </div>

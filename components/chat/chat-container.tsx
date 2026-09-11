@@ -198,36 +198,45 @@ export function ChatContainer() {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="flex flex-col h-screen bg-mesh-canvas text-slate-900 selection:bg-blue-100 selection:text-blue-900 relative">
+    <div className="flex flex-col h-[100dvh] bg-mesh-canvas text-slate-900 selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden">
       {/* ── Floating New Chat Action (Only when active chat) ── */}
       {hasMessages && (
         <button
           onClick={handleNewChat}
-          className="fixed top-4 right-4 z-40 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-white/90 hover:bg-white border border-slate-200/80 shadow-xs hover:shadow-sm text-slate-700 backdrop-blur-md transition-all cursor-pointer"
+          className="fixed top-3 right-3 sm:top-4 sm:right-4 z-40 inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-white/95 hover:bg-white border border-slate-200/90 shadow-sm text-slate-700 backdrop-blur-md transition-all cursor-pointer"
           title="Start New Chat"
         >
-          <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+          <RotateCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-500" />
           <span>New Chat</span>
         </button>
       )}
 
       {/* ── Message Area ─────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="max-w-2xl sm:max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <div className="max-w-2xl sm:max-w-3xl mx-auto px-3 sm:px-6 py-4 sm:py-8 pb-32 sm:pb-36">
           {!hasMessages ? (
             <WelcomeScreen onSuggestedQuestion={sendMessage} />
           ) : (
-            <div className="space-y-6 pt-4">
-              {messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  role={message.role}
-                  content={message.content}
-                  sources={message.sources}
-                  debugInfo={message.debugInfo}
-                  isStreaming={message.isStreaming}
-                />
-              ))}
+            <div className="space-y-4 sm:space-y-6 pt-2 sm:pt-4">
+              {messages
+                .filter(
+                  (message) =>
+                    !(
+                      message.role === 'assistant' &&
+                      !message.content &&
+                      message.isStreaming
+                    )
+                )
+                .map((message) => (
+                  <MessageBubble
+                    key={message.id}
+                    role={message.role}
+                    content={message.content}
+                    sources={message.sources}
+                    debugInfo={message.debugInfo}
+                    isStreaming={message.isStreaming}
+                  />
+                ))}
 
               {isLoading &&
                 !messages.some((m) => m.isStreaming && m.content.length > 0) && (
@@ -247,28 +256,6 @@ export function ChatContainer() {
           )}
         </div>
       </div>
-
-      {/* ── Quick Follow-up Chips (When conversation is active) ── */}
-      {hasMessages && (
-        <div className="flex-shrink-0 max-w-2xl sm:max-w-3xl mx-auto w-full px-4 pb-2 flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
-          {[
-            { label: '🚀 8 Live Projects & Links', query: 'Show me all of Zohaibs live projects and links' },
-            { label: '⚡ Core Tech Stack', query: 'What are Zohaibs core technologies and skills?' },
-            { label: '💼 Work History', query: 'Tell me about Zohaibs work history and roles' },
-            { label: '🎓 Education', query: 'Where did Zohaib study and what was his CGPA?' },
-            { label: '🤝 Contact & Collaboration', query: 'How can I contact Zohaib or hire him for a project?' },
-          ].map((chip) => (
-            <button
-              key={chip.label}
-              onClick={() => sendMessage(chip.query)}
-              disabled={isLoading}
-              className="text-xs whitespace-nowrap px-3 py-1 rounded-full bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200/80 shadow-2xs transition-all disabled:opacity-50 font-medium cursor-pointer"
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* ── Modern Floating Input Dock ───────────────────────── */}
       <ChatInput onSend={sendMessage} isLoading={isLoading} />

@@ -15,8 +15,8 @@
 
 ## LinkedIn
 
-- Profile: Muhammad Zohaib
-- Community: 2,500+ followers and 500+ connections
+- **LinkedIn Profile:** [https://www.linkedin.com/in/zohaibch07/](https://www.linkedin.com/in/zohaibch07/)
+- Community: 2,500+ followers and 500+ connections in the tech community
 
 ## GitHub
 
@@ -32,4 +32,4 @@
 
 ## Preferred Contact Method
 
-- Email (mzohaibch.07@gmail.com), Fiverr ([https://www.fiverr.com/s/lr9q0X7](https://www.fiverr.com/s/lr9q0X7)), or LinkedIn.
+- Email (mzohaibch.07@gmail.com), LinkedIn ([https://www.linkedin.com/in/zohaibch07/](https://www.linkedin.com/in/zohaibch07/)), or Fiverr ([https://www.fiverr.com/s/lr9q0X7](https://www.fiverr.com/s/lr9q0X7)).

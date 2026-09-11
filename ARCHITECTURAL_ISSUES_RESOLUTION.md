@@ -123,7 +123,7 @@ Every document in `knowledge/` was audited against verified primary sources:
   - WhatsApp / Phone: `+92 3431197504`
   - Fiverr Hiring Link: [https://www.fiverr.com/s/lr9q0X7](https://www.fiverr.com/s/lr9q0X7)
   - GitHub: [https://github.com/zohaib65-ch](https://github.com/zohaib65-ch)
-  - LinkedIn: Muhammad Zohaib
+  - LinkedIn: [https://www.linkedin.com/in/zohaibch07/](https://www.linkedin.com/in/zohaibch07/)
 - **Placeholder Rule for Unverified Items**:
   In `knowledge/certifications.md`, external vendor certifications (AWS/GCP certifications) were unverified and therefore marked with `[PLACEHOLDER]`:
   ```markdown

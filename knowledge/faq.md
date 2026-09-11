@@ -40,7 +40,7 @@ He graduated from the University of Sahiwal with a Bachelor of Science in Softwa
 - **Phone:** +92 3431197504
 - **Fiverr:** [https://www.fiverr.com/s/lr9q0X7](https://www.fiverr.com/s/lr9q0X7)
 - **GitHub:** [https://github.com/zohaib65-ch](https://github.com/zohaib65-ch)
-- **LinkedIn:** Muhammad Zohaib (Search mzohaibch or zohaib65-ch)
+- **LinkedIn:** [https://www.linkedin.com/in/zohaibch07/](https://www.linkedin.com/in/zohaibch07/)
 
 ## What are Zohaib's personal interests and hobbies?
 
