@@ -18,6 +18,15 @@ export const metadata: Metadata = {
   title: "Muhammad Zohaib | AI Digital Twin",
   description:
     "Interactive AI Digital Twin of Muhammad Zohaib — Full-Stack Web Developer & MERN/Vue.js Specialist. Strictly grounded in verified portfolio and experience facts.",
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({
