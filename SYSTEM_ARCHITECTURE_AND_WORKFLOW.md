@@ -1,251 +1,503 @@
-# System Architecture & Workflow Guide
-### Personal AI Knowledge System for Muhammad Zohaib
+# System Architecture & Complete Workflow Guide
+### Ask My Digital Twin — Personal AI Knowledge System for Muhammad Zohaib
 
 ---
 
-## 1. Executive Overview
+## 1. Executive Summary & System Purpose
 
-**Ask My Digital Twin** is an intelligent, production-quality personal knowledge system. It acts as an interactive digital representative of **Muhammad Zohaib** (Full-Stack Web Developer & MERN/Vue.js Engineer).
+**Ask My Digital Twin** is a production-grade, full-stack personal AI knowledge system that functions as an interactive digital representative of **Muhammad Zohaib** (Full-Stack Web Developer & MERN/Vue.js Specialist).
 
-Visitors can ask questions about Zohaib's:
-- Professional background & education
-- Top live production projects (TruckFlow, Start2Write, Meat Zoo, DIGIMAG, etc.)
-- Technical skill set (MERN Stack, Vue.js, Next.js, WebSockets, MongoDB, AWS)
-- Work experience (Sideline Technologies, Ropstam Solutions, Freelancing)
-- Services offered & how to hire him on Fiverr, LinkedIn, or Email
+Unlike generic chatbots that guess or hallucinate details, this system operates under the foundational principle of **Strict Grounding & Zero Hallucination**:
+- It answers questions exclusively using verified, factual chunks from Muhammad Zohaib's personal knowledge base.
+- If a visitor asks a question that cannot be confirmed from the stored portfolio facts (e.g. personal opinions, unverified certifications, or outside trivia), the system immediately refuses to guess and delivers a grounded fallback response.
+- Every live production project (TruckFlow, Start2Write, Meat Zoo, DIGIMAG, DIGITALY, JobCrap, Minest, 90j Pages) includes verified live URLs rendered as clickable markdown links directly in the response.
 
-The core philosophy of this system is **Strict Grounding**: it only answers questions using verified facts from Zohaib's personal knowledge base, eliminating unsupported assumptions or hallucinations.
+### Core Business & Personal Goals
+1. **24/7 Interactive Client Engagement**: Prospective employers, freelance clients on Fiverr, and technical collaborators can interrogate Zohaib's experience, architecture patterns, and stack dynamically in real-time.
+2. **Instant Technical Proof**: Clients can explore detailed case studies of deployed projects with one click.
+3. **Seamless Direct Hiring**: Direct links to Zohaib's Fiverr gig (`https://www.fiverr.com/s/lr9q0X7`), LinkedIn profile (`https://www.linkedin.com/in/zohaibch07/`), GitHub (`https://github.com/zohaib65-ch`), and direct email (`mzohaibch.07@gmail.com`) are provided on demand.
 
 ---
 
-## 2. The End-to-End Reply Lifecycle
+## 2. High-Level Architecture Diagram
 
-When a visitor types a question (e.g., *"give me list of zohaibs projects"* or *"Who is Zohaib?"*), here is the exact step-by-step sequence that produces the real-time reply:
+```mermaid
+graph TB
+    subgraph Client Layer ["1. Client Layer (Browser)"]
+        UI["Next.js App / Client Components"]
+        Input["ChatInput (Floating Dock)"]
+        Bubble["MessageBubble (Zohaib Portrait)"]
+        Typing["TypingIndicator (Neural Spectrum & Shimmer)"]
+        Parser["FormattedMessage (Markdown & Links)"]
+    end
+
+    subgraph Server Layer ["2. Next.js Serverless API (App Router)"]
+        API["POST /api/chat (SSE Stream)"]
+        AdminAPI["POST /api/ingest & /api/admin/stats"]
+        RAG["RAG Orchestrator (lib/rag.ts)"]
+        PromptEngine["Prompt Engine & Guardrails (lib/prompt.ts)"]
+    end
+
+    subgraph AI Layer ["3. Google Gemini AI Services"]
+        EmbedAPI["gemini-embedding-001 (768 Dimensions)"]
+        LLMPrimary["gemini-3.7-flash (Streaming Output)"]
+        LLMFallback["gemini-3.5-flash / gemini-3.6-flash (Resilience)"]
+    end
+
+    subgraph Database Layer ["4. MongoDB Atlas Cloud Cluster"]
+        Atlas["MongoDB Atlas Cluster (cluster0.momfcuy.mongodb.net)"]
+        Chunks["Database: 'ask-my-twin' | Collection: 'chunks'"]
+        VectorIndex["Vector Search Index: 'vector_index' (Cosine Similarity)"]
+    end
+
+    subgraph Knowledge Layer ["5. Local Knowledge Base"]
+        MD["10 Verified Markdown Files (knowledge/*.md)"]
+        IngestScript["Ingestion Pipeline (scripts/ingest.ts)"]
+    end
+
+    Input -->|User Message| API
+    API --> RAG
+    RAG -->|Generate Query Vector| EmbedAPI
+    EmbedAPI -->|768-dim Vector| RAG
+    RAG -->|$vectorSearch Query| VectorIndex
+    VectorIndex -->|Top-K Ranked Chunks| Chunks
+    Chunks -->|Retrieved Chunks + Scores| RAG
+    RAG -->|Filter (Score >= 0.65)| PromptEngine
+    PromptEngine -->|Assembled Prompt| LLMPrimary
+    LLMPrimary -.->|On Failure / Rate Limit| LLMFallback
+    LLMPrimary -->|Token Stream| API
+    LLMFallback -->|Token Stream| API
+    API -->|Server-Sent Events (SSE)| UI
+    UI --> Bubble
+    UI --> Typing
+    Bubble --> Parser
+
+    MD --> IngestScript
+    IngestScript --> EmbedAPI
+    IngestScript --> Chunks
+    AdminAPI --> IngestScript
+```
+
+---
+
+## 3. The End-to-End Chat Lifecycle
+
+When a visitor submits a question, the application executes a precision 9-step pipeline:
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor User as Visitor / Client Browser
-    participant API as Next.js API Route (/api/chat)
-    participant Embed as Gemini Embedding API (gemini-embedding-001)
-    participant Atlas as MongoDB Atlas Vector Search
-    participant Prompt as Context Assembly & System Prompt
-    participant LLM as Gemini Generation Model (gemini-3.7-flash)
+    participant UI as ChatContainer UI
+    participant API as Next.js API (/api/chat)
+    participant Embed as Gemini Embeddings (gemini-embedding-001)
+    participant Mongo as MongoDB Atlas ($vectorSearch)
+    participant RAG as RAG Pipeline (lib/rag.ts)
+    participant LLM as Google Gemini (gemini-3.7-flash / fallback)
 
-    User->>API: POST /api/chat with user message & history
-    API->>Embed: Convert question into 768-dim vector
-    Embed-->>API: Returns float[768] vector
-    API->>Atlas: $vectorSearch (cosine similarity, topK=8)
-    Atlas-->>API: Returns ranked matching chunks + scores
-    alt Chunks match threshold (score >= 0.65)
-        API->>Prompt: Assemble retrieved chunks + anti-hallucination prompt
-        Prompt-->>API: Complete grounded prompt
-        API->>LLM: Stream answer tokens
-        LLM-->>API: Token chunks
-        API-->>User: Server-Sent Events (SSE) stream (event: token)
-        User->>User: FormattedMessage renders live text + clickable links
-    else No chunks pass threshold (< 0.65)
-        API-->>User: Grounded fallback: "I don't have enough information..."
+    User->>UI: Types query (e.g., "What are Zohaib's top projects?")
+    UI->>UI: Renders user message bubble immediately
+    UI->>UI: Activates luxury TypingIndicator (Avatar pulse + wave bars)
+    UI->>API: POST /api/chat { message, history }
+    API->>RAG: ragPipelineStream(message, { history })
+    RAG->>Embed: generateEmbedding(message)
+    Embed-->>RAG: Returns float[768] vector (Dimension verified)
+    RAG->>Mongo: aggregate([ { $vectorSearch: { queryVector, numCandidates: 50, limit: 8 } } ])
+    Mongo-->>RAG: Returns ranked chunks with cosine scores
+    alt Chunks pass similarity threshold (score >= 0.65)
+        RAG->>RAG: buildPrompt(chunks, question, history)
+        RAG->>LLM: generateAnswerStream(systemPrompt, userMessage)
+        LLM-->>RAG: Yields text token chunks
+        RAG-->>API: SSE Stream (event: token, data: { text })
+        API-->>UI: Sends SSE Events in real-time
+        UI->>UI: Hides TypingIndicator upon first token receipt
+        UI->>UI: Streams text into MessageBubble via FormattedMessage
+        API-->>UI: event: sources (list of documents + cosine scores)
+        API-->>UI: event: done
+    else No chunks meet threshold (< 0.65)
+        RAG-->>API: Yields NO_CONTEXT_FALLBACK
+        API-->>UI: "I don't have enough information about that in my knowledge base."
     end
 ```
 
----
+### In-Depth Step Descriptions
 
-### Step-by-Step Breakdown
+#### 1. Input Submission (`components/chat/chat-input.tsx`)
+- The user enters a question into the floating capsule dock.
+- Clean validation checks character limits (max 2000 characters) and prevents empty dispatches.
+- Enter key dispatches the message (`Shift+Enter` creates a new line).
 
-#### Step 1: User Types Question in Frontend UI
-- The visitor types a query into the `ChatInput` component.
-- The user message appears in the chat window, and `fetch('/api/chat')` is dispatched with `method: 'POST'`.
+#### 2. Request Handling (`app/api/chat/route.ts`)
+- Configured with `export const dynamic = 'force-dynamic'`.
+- Validates JSON payload format and message length.
+- Initializes a `ReadableStream` with Server-Sent Events headers (`Content-Type: text/event-stream`, `Cache-Control: no-cache`, `Connection: keep-alive`).
 
-#### Step 2: Next.js API Route Receives Request
-- File: `app/api/chat/route.ts`
-- The route validates the payload, configures streaming headers (`Content-Type: text/event-stream`, `Cache-Control: no-cache`), and triggers `ragPipelineStream()`.
-
-#### Step 3: Query Vectorization (Embedding Generation)
-- File: `lib/embeddings.ts`
-- The system calls Google Gemini's `gemini-embedding-001` model:
+#### 3. Vector Embedding Generation (`lib/embeddings.ts`)
+- Calls Gemini's official `gemini-embedding-001` via `@google/genai`.
+- Configured with `outputDimensionality: 768`.
+- **Strict Verification Guardrail**:
   ```ts
-  const embedding = await generateEmbedding(question);
+  if (embedding.length !== RAG_CONFIG.embedding.dimensions) {
+    throw new Error(`Embedding dimension mismatch: expected 768, got ${embedding.length}`);
+  }
   ```
-- **Validation**: Enforces that the returned embedding vector contains **exactly 768 dimensions**. If dimensions differ, an explicit runtime error is thrown rather than padding or truncating vectors.
+- Vectors are never padded or silently truncated; dimensions strictly match the MongoDB Atlas index schema.
 
-#### Step 4: MongoDB Atlas Vector Search ($vectorSearch)
-- File: `lib/retrieval.ts`
-- The 768-dimension vector is sent to MongoDB Atlas inside an aggregation pipeline using the `$vectorSearch` stage:
+#### 4. High-Confidence Category Detection (`lib/retrieval.ts`)
+- Analyzes question keywords against a dictionary of categories (`projects`, `skills`, `experience`, `services`, `contact`, `education`).
+- Requires a score $\ge 2$ keyword hits before applying a metadata pre-filter directly inside `$vectorSearch.filter`.
+- If confidence is not unambiguous, it falls back to pure global semantic search across all categories.
+
+#### 5. MongoDB Atlas Vector Search (`lib/retrieval.ts`)
+- Executes `$vectorSearch` aggregation stage:
   ```json
   {
     "$vectorSearch": {
       "index": "vector_index",
       "path": "embedding",
-      "queryVector": [0.012, -0.045, ...],
+      "queryVector": "<768-float-array>",
       "numCandidates": 50,
       "limit": 8
     }
   }
   ```
-- Atlas ranks all stored knowledge chunks by **cosine similarity**.
+- Projects `score: { $meta: "vectorSearchScore" }` (cosine similarity metric).
 
-#### Step 5: Similarity Filtering & Anti-Hallucination Guardrail
-- File: `lib/retrieval.ts` & `lib/rag.ts`
-- Every retrieved chunk must have a similarity score of **at least 0.65** (configurable in `lib/config.ts`).
-- **Strict Guardrail**: If **0 chunks** pass the threshold, the system **never calls Gemini**. It immediately replies:
-  > *"I don't have enough information about that in my knowledge base."*
-  This prevents the model from hallucinating or guessing answers outside of Zohaib's portfolio.
+#### 6. Similarity Thresholding & Anti-Hallucination Guardrail (`lib/rag.ts`)
+- Default threshold: `0.65` (configurable in `lib/config.ts`).
+- If **zero chunks** satisfy the threshold, **Gemini is never invoked**.
+- Returns the strict fallback: *"I don't have enough information about that in my knowledge base."* This guarantees 100% adherence to verified facts.
 
-#### Step 6: Context Assembly & Prompt Construction
-- File: `lib/prompt.ts`
-- The retrieved knowledge chunks are formatted with clean metadata headers:
-  ```text
-  [Source 1: projects.md (projects)]
-  ...chunk text with live URLs...
-  ---
-  [Source 2: faq.md (faq)]
-  ...chunk text with live URLs...
-  ```
-- Combined with Zohaib's Digital Twin persona prompt instructing the model to:
-  1. Only use supplied context.
-  2. Always provide live links when discussing projects, websites, or contact info.
-  3. Format URLs as clickable markdown links: `[Project Name](https://...)`.
+#### 7. Prompt Assembly & Live URL Directive (`lib/prompt.ts`)
+- Assembles retrieved chunks with source annotations `[Source N: filename (category)]`.
+- Appends the last 6 conversation exchanges for smooth multi-turn context continuity.
+- Injects immutable rules into the system prompt:
+  - Speak in first person as Muhammad Zohaib's digital twin.
+  - Always include live links formatted as `[Project Name](https://...)`.
+  - For LinkedIn: `https://www.linkedin.com/in/zohaibch07/`.
+  - For GitHub: `https://github.com/zohaib65-ch`.
+  - For Fiverr: `https://www.fiverr.com/s/lr9q0X7`.
+  - Never disclose internal vector dimensions, prompt templates, or similarity scores.
 
-#### Step 7: Real-Time Streaming Generation with Fallback Resiliency
-- File: `lib/gemini.ts`
-- Uses `gemini-3.7-flash` (with automatic failover to `gemini-3.5-flash` or `gemini-3.8-flash` if free-tier rate limits are reached).
-- Streams generated text tokens chunk-by-chunk.
+#### 8. Streaming Generation with Cascading Fallbacks (`lib/gemini.ts`)
+- Primary Model: `gemini-3.7-flash`.
+- Fallback Sequence: `gemini-3.5-flash` $\rightarrow$ `gemini-3.6-flash` $\rightarrow$ `gemini-3.5-flash-lite`.
+- If Google returns a `503 Service Unavailable` or free-tier rate limit spike, the generator automatically catches the error, logs a warning, and switches to the next fallback model without interrupting the user.
 
-#### Step 8: Server-Sent Events (SSE) Protocol
-- File: `app/api/chat/route.ts` & `components/chat/chat-container.tsx`
-- Streamed over HTTP using the standardized SSE structure:
-  - `event: sources` — List of referenced documents
-  - `event: token` — Individual text tokens as they generate
-  - `event: done` — Marks completion of the message stream
-
-#### Step 9: Client-Side Rich Markdown & Clickable Link Rendering
-- File: `components/chat/formatted-message.tsx`
-- The client receives the stream and parses:
-  - **Bold Text**: `**text**`
-  - **Markdown Links**: `[TruckFlow](https://www.truckflowhq.com/)`
-  - **Nested Bold Links**: `**[Meat Zoo](https://www.meatszoo.com/)**`
-  - **Raw URLs**: `https://...`
-- Transforms them into vibrant, clickable links with external link icons (`↗`) that open directly in a new tab.
+#### 9. Client-Side Rendering (`components/chat/formatted-message.tsx`)
+- Custom lightweight tokenizer parses Markdown links (`[text](url)`), bold styling (`**text**`), headings (`##`, `###`), and numbered lists.
+- Renders clickable external link chips with dedicated target `_blank`, `rel="noopener noreferrer"`, and visual external arrow icons.
 
 ---
 
-## 3. The Knowledge Base Pipeline
+## 4. The Knowledge Base Architecture
 
-All data about Muhammad Zohaib resides in pure Markdown files inside the `knowledge/` directory:
+All knowledge is curated in 10 Markdown files stored in the `/knowledge` directory:
 
-| Document | Content & Purpose |
-|---|---|
-| `personal.md` | Biography, background, location (Islamabad), language proficiencies, personal hobbies. |
-| `projects.md` | Master project directory + detailed case studies for all 8+ live production websites (TruckFlow, Start2Write, Meat Zoo, DIGIMAG, DIGITALY, JobCrap, Minest, 90j Pages, Digital Twin). |
-| `skills.md` | Core technical competencies (JavaScript, TypeScript, React, Vue.js, Node.js, Express, MongoDB, WebSockets, Tailwind CSS, AWS, Git). |
-| `experience.md` | Commercial roles at Sideline Technologies (PVT) LTD, Ropstam Solutions Inc., and international freelancing. |
-| `education.md` | University of Sahiwal, BS in Computer Software Engineering, 3.35 CGPA (Grade A). |
-| `contact.md` | Email (`mzohaibch.07@gmail.com`), WhatsApp (+92 3431197504), Fiverr link, GitHub, LinkedIn (`https://www.linkedin.com/in/zohaibch07/`). |
-| `services.md` | Full-stack web development, MERN & Vue.js engineering, custom admin dashboards, WebSocket applications, and Fiverr hiring options. |
-| `faq.md` | Direct answers to top questions visitors frequently ask. |
-| `achievements.md` | Academic excellence, 5+ deployed dashboards, freelance delivery track record. |
-| `certifications.md` | Degree qualifications and continuous technical learning. |
-
-### How Ingestion & Deduplication Work (`scripts/ingest.ts`)
-
-1. **Document Loading**: Reads all `.md` files in `knowledge/`.
-2. **Text Cleaning & Chunking**: Cleans text and splits documents into sliding-window chunks (target: 800 characters, overlap: 200 characters).
-3. **MD5 Hashing**: Computes an MD5 checksum of each chunk's content.
-4. **Deduplication Check**: Queries MongoDB Atlas for existing hashes. Chunks whose content hasn't changed are **skipped** to save API embedding quota.
-5. **Embedding Generation**: Only changed or new chunks are embedded using `gemini-embedding-001`.
-6. **Upsert / Replacement**: Overwrites previous versions of chunks by `chunkId` to guarantee **no duplicate chunks**.
-7. **Search Index Verification**: Automatically checks if MongoDB Atlas has the `vector_index` search index created, creating it via driver if missing.
+| File | Category | Content Summary & Scope |
+| :--- | :--- | :--- |
+| **`personal.md`** | `personal` | Bio, summary, current location (Islamabad, Pakistan), languages (English, Urdu), personal hobbies (travelling, movies, gardening, emerging tech). |
+| **`projects.md`** | `projects` | Master project catalog of 8+ live web applications with production URLs: TruckFlow, Start2Write, Meat Zoo, DIGIMAG, DIGITALY, JobCrap, Minest, 90j Pages, and Digital Twin. |
+| **`skills.md`** | `skills` | Exhaustive tech stack breakdown: JavaScript, TypeScript, React.js, Vue.js, Next.js, Node.js, Express.js, MongoDB, WebSockets, Tailwind CSS, AWS, Git. |
+| **`experience.md`** | `experience` | Commercial tenures at Sideline Technologies (PVT) LTD (Vue.js Developer), Ropstam Solutions Inc. (MERN Developer), and international freelance engagements. |
+| **`education.md`** | `education` | Bachelor of Science in Computer Software Engineering from University of Sahiwal. Graduated with 3.35 CGPA (Grade A). |
+| **`contact.md`** | `contact` | Direct communication coordinates: Email (`mzohaibch.07@gmail.com`), WhatsApp/Phone (`+92 3431197504`), Fiverr, GitHub, LinkedIn. |
+| **`services.md`** | `services` | Commercial offerings: Full-stack MERN/Vue applications, admin dashboards, real-time WebSocket systems, API design, bug fixing, and Fiverr hiring with escrow. |
+| **`faq.md`** | `faq` | Frequently asked questions addressing location, availability, pricing, hiring channels, and technical specializations. |
+| **`achievements.md`** | `achievements` | Academic distinctions, 5+ deployed client dashboards, performance optimizations, and community presence. |
+| **`certifications.md`** | `certifications` | Degree verification and strict `[PLACEHOLDER]` designation for unverified third-party vendor credentials. |
 
 ---
 
-## 4. Why the Admin Panel Exists (`/admin`)
+## 5. Ingestion Pipeline & Deduplication Engine
 
-The `/admin` route is designed as the owner's **Control Room** for Muhammad Zohaib:
+The ingestion pipeline (`scripts/ingest.ts` and `lib/documents.ts`) converts static Markdown files into indexed vector embeddings stored in MongoDB Atlas:
 
-1. **One-Click Re-Ingestion (No Terminal Required)**:
-   - When you update a project link, add a new client, or edit your resume in `knowledge/`, you don't have to SSH into a server or run commands in terminal.
-   - Simply open `/admin`, enter your secret, and click **"Run Ingestion"**. The system instantly vectorizes new data into Atlas.
-2. **Chunk Inspector**:
-   - View exactly how your documents were split into chunks, their character sizes, and their MD5 hashes.
-3. **Atlas Search Index Monitor**:
-   - Check if the vector search index is `READY`, inspect vector dimensions (768), and review cluster metrics.
-4. **Isolated Vector Search Sandbox**:
-   - Test search queries and see raw cosine similarity scores directly without cluttering the public chat.
-5. **Security & Privacy**:
-   - The Admin button is **completely hidden from public visitors** on the homepage and chat screen. It is only accessible if you navigate directly to `/admin` in your browser and provide the secret password configured in `.env.local`.
+```mermaid
+flowchart TD
+    A[Read knowledge/*.md] --> B[Clean Markdown & Strip Frontmatter]
+    B --> C[Sliding Window Chunking<br/>Target: 800 chars | Overlap: 200 chars]
+    C --> D[Generate Deterministic MD5 Content Hash]
+    D --> E[Query MongoDB Atlas Collection for Existing Hashes]
+    E -->|Hash Match Found| F[Skip Chunk - Save API Quota]
+    E -->|New or Modified Hash| G[Generate Embedding via gemini-embedding-001]
+    G --> H[Upsert Chunk Document into Atlas]
+    H --> I[Prune Stale Chunks from Deleted/Modified Sections]
+    I --> J[Verify vector_index Status in MongoDB Atlas]
+```
+
+### Key Technical Characteristics
+1. **Sliding-Window Chunking**:
+   - `chunkSize`: 800 characters
+   - `chunkOverlap`: 200 characters
+   - `minChunkSize`: 100 characters (discards empty trailing fragments)
+2. **MD5 Content Hash Deduplication**:
+   - Every chunk receives an MD5 checksum of its text content.
+   - During re-ingestion, existing hashes in MongoDB are skipped. Only new or modified sections trigger Gemini embedding API calls.
+3. **Chunk Id Scheme**:
+   - Format: `${filename}-${chunkIndex}` (e.g. `projects.md-0`, `projects.md-1`).
+   - Enables clean atomic replacement without duplicate records.
 
 ---
 
-## 5. Configuration Reference (`lib/config.ts`)
+## 6. MongoDB Atlas Vector Search Specification
 
-All core parameters are centralized in `lib/config.ts`:
+### Database & Collection
+- **Database**: `ask-my-twin` (configurable via `MONGODB_DB` env variable)
+- **Collection**: `chunks`
 
-```ts
+### Document Schema
+```typescript
+interface DocumentChunk {
+  _id?: ObjectId;
+  content: string;               // Raw chunk text
+  embedding: number[];           // Array of 768 floating-point numbers
+  metadata: {
+    source: string;              // e.g. "projects.md"
+    category: string;            // e.g. "projects"
+    chunkIndex: number;          // e.g. 0
+    totalChunks: number;         // e.g. 5
+    title: string;               // Extracted document title
+  };
+  contentHash: string;           // MD5 hash for change detection
+  chunkId: string;               // Unique chunk identifier
+  createdAt: string;             // ISO-8601 timestamp
+}
+```
+
+### Search Index Definition (`vector_index`)
+To execute `$vectorSearch`, MongoDB Atlas requires a Search Index configured as:
+```json
+{
+  "fields": [
+    {
+      "type": "vector",
+      "path": "embedding",
+      "numDimensions": 768,
+      "similarity": "cosine"
+    },
+    {
+      "type": "filter",
+      "path": "metadata.category"
+    }
+  ]
+}
+```
+
+---
+
+## 7. Frontend UI & UX Architecture
+
+The user interface is engineered with a **clean, luxury editorial aesthetic** and zero distraction.
+
+### Key Components
+1. **`app/page.tsx`**:
+   - Clean root entry point loading `ChatContainer` directly.
+   - No unnecessary landing page barriers.
+2. **`components/chat/chat-container.tsx`**:
+   - Root conversational orchestrator.
+   - Uses **`h-[100dvh]`** (Dynamic Viewport Height) so the mobile browser address bar never squashes or clips the input dock.
+   - Prevents duplicate bubble rendering by hiding empty streaming assistant bubbles until tokens start streaming.
+   - Smooth auto-scrolling with `messagesEndRef`.
+3. **`components/chat/message-bubble.tsx`**:
+   - **Assistant Messages**: Features Muhammad Zohaib's verified portrait (`/zohaib.jpg`) with an online status indicator, compact `AI Twin` badge, copy action, and responsive body text.
+   - **User Messages**: Obsidian capsule bubble with clean padding.
+   - **Mobile Optimizations**: `whitespace-nowrap truncate` prevents author names from breaking across lines; responsive font sizes (`text-[13px] sm:text-[14.5px]`).
+4. **`components/chat/chat-input.tsx`**:
+   - Floating capsule dock styled after ChatGPT and Claude.
+   - Auto-growing textarea that expands dynamically up to 140px.
+   - Mobile-shortened placeholder: `"Ask anything about Zohaib..."`.
+5. **`components/chat/typing-indicator.tsx`**:
+   - Luxury animated thinking card.
+   - Live breathing radar beacon around Zohaib's portrait.
+   - 4-bar neural spectrum wave oscillating in real-time.
+   - Shimmer light sweep animation across the card.
+   - Cycles through real thinking phases (Accessing memory $\rightarrow$ Retrieving projects $\rightarrow$ Synthesizing response).
+6. **`components/chat/welcome-screen.tsx`**:
+   - Hero portrait of Muhammad Zohaib with glowing border.
+   - Interactive prompt cards to quickly explore Top Projects, Tech Stack, Experience, or Contact Channels.
+7. **Custom Favicon Suite**:
+   - `app/icon.svg` & `public/icon.svg`: Razor-sharp scalable vector SVG featuring an obsidian squircle, cybernetic geometric "Z", and twin neural nodes.
+   - `app/icon.png` (192x192) & `app/apple-icon.png` (180x180).
+
+---
+
+## 8. Admin Control Room (`/admin`)
+
+The `/admin` route serves as Muhammad Zohaib's private administrative hub:
+
+1. **Hidden from Public View**: No buttons or navigation links point to `/admin` from the chat interface. It is protected by password authentication (`ADMIN_SECRET`).
+2. **Browser-Based One-Click Ingestion**: Update any Markdown file in `knowledge/`, visit `/admin`, and click **"Run Ingestion"** to vectorize and sync without terminal access.
+3. **Atlas Index Status & Metrics**: Live telemetry displaying total chunks, database name, and vector index health.
+4. **Isolated Vector Search Sandbox**: Test queries against MongoDB Atlas and review raw cosine similarity scores directly.
+
+---
+
+## 9. Complete Repository File Map
+
+```text
+My-Digital-Twin/
+├── app/
+│   ├── admin/
+│   │   └── page.tsx                 # Protected admin control room UI
+│   ├── api/
+│   │   ├── admin/stats/
+│   │   │   └── route.ts             # Returns chunk counts and index health
+│   │   ├── chat/
+│   │   │   └── route.ts             # Main RAG streaming SSE endpoint
+│   │   └── ingest/
+│   │       └── route.ts             # On-demand ingestion API endpoint
+│   ├── chat/
+│   │   └── page.tsx                 # Redirects to root
+│   ├── globals.css                  # Design tokens, custom animations, scrollbars
+│   ├── layout.tsx                   # Root HTML, Outfit & Plus Jakarta fonts, favicon metadata
+│   ├── page.tsx                     # Main page rendering ChatContainer directly
+│   ├── icon.svg                     # Vector SVG favicon
+│   ├── icon.png                     # Standard PNG app icon
+│   └── apple-icon.png               # Apple touch icon
+├── components/
+│   ├── admin/
+│   │   └── admin-panel.tsx          # Full administrative dashboard component
+│   ├── chat/
+│   │   ├── chat-container.tsx       # State management, SSE parser, 100dvh viewport
+│   │   ├── chat-input.tsx           # Floating input bar, textarea auto-expand
+│   │   ├── formatted-message.tsx    # Markdown link and typography parser
+│   │   ├── message-bubble.tsx       # Chat message bubbles with photo avatars
+│   │   ├── typing-indicator.tsx     # Animated thinking card with neural wave bars
+│   │   └── welcome-screen.tsx       # Hero intro and quick starter cards
+│   └── sources/
+│       └── source-list.tsx          # Verified document citations with scores
+├── knowledge/                       # Ground truth markdown files
+│   ├── achievements.md
+│   ├── certifications.md
+│   ├── contact.md
+│   ├── education.md
+│   ├── experience.md
+│   ├── faq.md
+│   ├── personal.md
+│   ├── projects.md
+│   ├── services.md
+│   └── skills.md
+├── lib/
+│   ├── config.ts                    # Centralized RAG configuration
+│   ├── documents.ts                 # Markdown loading and text chunking logic
+│   ├── embeddings.ts                # Gemini gemini-embedding-001 client (768d)
+│   ├── gemini.ts                    # Gemini LLM generation with automatic fallback
+│   ├── mongodb.ts                   # Resilient MongoDB client singleton for serverless
+│   ├── prompt.ts                    # Persona instructions and context assembly
+│   ├── rag.ts                       # RAG pipeline orchestration
+│   ├── retrieval.ts                 # $vectorSearch query builder and category filter
+│   └── types.ts                     # TypeScript definitions across the app
+├── public/
+│   ├── avatar.jpg / zohaib.jpg      # Official portrait photo of Muhammad Zohaib
+│   ├── icon.svg / icon.png          # Public favicon assets
+│   └── apple-icon.png               # iOS home screen bookmark icon
+├── scripts/
+│   └── ingest.ts                    # CLI ingestion runner (npm run ingest)
+├── ARCHITECTURAL_ISSUES_RESOLUTION.md# Comprehensive 3-issue resolution documentation
+├── SYSTEM_ARCHITECTURE_AND_WORKFLOW.md# This master documentation file
+├── package.json                     # Scripts and dependencies
+└── tsconfig.json                    # TypeScript configuration
+```
+
+---
+
+## 10. Central Configuration Matrix (`lib/config.ts`)
+
+```typescript
 export const RAG_CONFIG = {
   embedding: {
-    model: 'gemini-embedding-001',
-    dimensions: 768, // Exact vector dimensions matched in Atlas
+    model: 'gemini-embedding-001',   // Official embedding model
+    dimensions: 768,                 // Strict dimension check
   },
   generation: {
-    model: 'gemini-3.7-flash', // Primary verified LLM
-    fallbackModels: ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'],
+    model: process.env.GEMINI_MODEL || 'gemini-3.7-flash',
+    fallbackModels: [
+      'gemini-3.5-flash',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash-lite',
+    ],
     maxOutputTokens: 2048,
     temperature: 0.7,
   },
+  chunking: {
+    chunkSize: 800,                  // Target characters per chunk
+    chunkOverlap: 200,               // Overlap between adjacent chunks
+    minChunkSize: 100,
+  },
   retrieval: {
     numCandidates: 50,
-    topK: 8, // Retrieves top 8 matching chunks for rich multi-project lists
-    similarityThreshold: 0.65, // Minimum cosine similarity
+    topK: 8,                         // Returns top 8 chunks for comprehensive answers
+    similarityThreshold: 0.65,       // Rejects unrelated queries
   },
   mongodb: {
-    database: 'ask-my-twin',
+    database: process.env.MONGODB_DB || 'ask-my-twin',
     collection: 'chunks',
     vectorIndex: 'vector_index',
+  },
+  knowledge: {
+    directory: 'knowledge',
   },
 };
 ```
 
 ---
 
-## 6. How to Update Data in Future
+## 11. Production Deployment & Troubleshooting Guide
 
-1. **Edit Markdown Files**: Open any file in `knowledge/` (e.g., `knowledge/projects.md` to add a new project).
-2. **Re-Ingest**:
-   - Option A (Terminal): Run `npm run ingest`
-   - Option B (Browser UI): Go to `http://localhost:3000/admin`, enter your password, and click **"Run Ingestion"**.
-3. Your Digital Twin will immediately start answering queries with the updated data!
+### 1. MongoDB Atlas Network Access (`SSL Alert 80`)
+- **Symptom**: `error:0A000438:SSL routines:ssl3_read_bytes:tlsv1 alert internal error:ssl/record/rec_layer_s3.c:918:SSL alert number 80`.
+- **Cause**: Vercel and cloud serverless lambdas use dynamic outbound IP addresses. If MongoDB Atlas has not whitelisted all incoming IPs, Atlas drops the TLS connection during the handshake with SSL alert 80.
+- **Fix**:
+  1. Open [MongoDB Atlas](https://cloud.mongodb.com).
+  2. Navigate to **Security** $\rightarrow$ **Network Access**.
+  3. Click **+ Add IP Address**.
+  4. Select **Allow Access from Anywhere** (`0.0.0.0/0`).
+  5. Click **Confirm**.
+
+### 2. Environment Variables Checklist (Vercel)
+Ensure these environment variables are defined in your hosting dashboard:
+- `MONGODB_URI`: `mongodb+srv://<user>:<password>@cluster0.momfcuy.mongodb.net/?retryWrites=true&w=majority`
+- `GEMINI_API_KEY`: API key from Google AI Studio.
+- `ADMIN_SECRET`: Password string to access `/admin`.
+- `NEXT_PUBLIC_APP_URL`: Production domain URL (e.g. `https://my-digital-twin.vercel.app`).
+
+### 3. Creating the Vector Search Index
+If setting up a brand-new MongoDB cluster:
+1. Go to Atlas $\rightarrow$ **Atlas Search** $\rightarrow$ **Create Search Index**.
+2. Select **Atlas Vector Search** (JSON Editor).
+3. Select Database `ask-my-twin` and Collection `chunks`.
+4. Name the index **`vector_index`**.
+5. Paste the definition:
+   ```json
+   {
+     "fields": [
+       {
+         "type": "vector",
+         "path": "embedding",
+         "numDimensions": 768,
+         "similarity": "cosine"
+       },
+       {
+         "type": "filter",
+         "path": "metadata.category"
+       }
+     ]
+   }
+   ```
+6. Click **Create Search Index**.
 
 ---
 
-## 7. Resolution of the 3 Critical Architecture Issues
+## 12. Maintenance Workflow: Adding New Projects & Experience
 
-For complete technical logs and matrices, see the standalone audit document:
-[ARCHITECTURAL_ISSUES_RESOLUTION.md](file:///Users/muhammadzohaib/projects/My-Digital-Twin/ARCHITECTURAL_ISSUES_RESOLUTION.md).
+Whenever Muhammad Zohaib completes a new project, joins a company, or earns an achievement:
 
-### Issue 1: Verified Gemini Generation Models
-* **Problem**: Theoretical model names (`gemini-3.8-flash`, older `gemini-2.0-flash`, `gemini-1.5-flash`) cause 404 deprecated or 503 high-demand errors.
-* **Resolution**: Verified all available models live against `@google/genai`. Configured `gemini-3.7-flash` as primary generation model, with verified fallback models `['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite']`. All verified models support streaming generation (`generateContentStream`).
-* **Enforcement**: Centralized in `lib/config.ts` (with `process.env.GEMINI_MODEL` override) and automated sequential fallback in `lib/gemini.ts`.
-
-### Issue 2: Verified Gemini Embedding Dimensions (768)
-* **Problem**: Never assume vector dimensions or allow silent padding/truncating when feeding MongoDB Atlas Vector Search.
-* **Resolution**: Model `gemini-embedding-001` was verified live to produce exactly **768 dimensions** with `outputDimensionality: 768`.
-* **Enforcement**: In `lib/embeddings.ts`, a runtime assertion explicitly checks:
-  ```ts
-  if (embedding.length !== RAG_CONFIG.embedding.dimensions) {
-    throw new Error(`Embedding dimension mismatch: expected ${RAG_CONFIG.embedding.dimensions}, but Gemini returned ${embedding.length}`);
-  }
-  ```
-  Vectors are never padded, truncated, or silently resized. Atlas index `vector_index` is configured with `dimensions: 768`, metric: `cosine`.
-
-### Issue 3: Verified Personal Knowledge Before Ingestion
-* **Problem**: Architecture templates contained generic placeholders or unverified claims.
-* **Resolution**: Audited all 10 markdown documents in `knowledge/`:
-  - Verified Muhammad Zohaib's education: BS Software Engineering, University of Sahiwal, 3.35 CGPA (Grade A).
-  - Verified commercial experience: Sideline Technologies (Vue.js Developer), Ropstam Solutions (MERN Developer), 5+ freelance client deliveries.
-  - Verified 8 live web apps + URLs: TruckFlow, Start2Write, Meat Zoo, DIGIMAG, DIGITALY, JobCrap, Minest, 90j Pages.
-  - Verified contact channels: Email (`mzohaibch.07@gmail.com`), Phone (`+92 3431197504`), Fiverr (`https://www.fiverr.com/s/lr9q0X7`), GitHub (`https://github.com/zohaib65-ch`).
-  - Strict placeholder rule: Unconfirmed vendor certifications (e.g. AWS/GCP) in `certifications.md` explicitly contain `[PLACEHOLDER]`. Zero fabricated information.
-  - Ingestion ran cleanly: 10 documents, 46 chunks stored in Atlas.
-
+1. **Update Local Knowledge File**:
+   - Add the project to `knowledge/projects.md` (include title, live URL, role, technologies, and metrics).
+2. **Execute Ingestion**:
+   - **Option A (Terminal)**: `npm run ingest`
+   - **Option B (Browser)**: Open `/admin`, enter secret, and click **"Run Ingestion"**.
+3. **Verify via Chat**:
+   - Ask the Digital Twin: *"Tell me about [New Project Name]"*.
+   - The bot will retrieve the new chunks and output the verified details with its live link.

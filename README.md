@@ -42,7 +42,7 @@ graph TD
         L --> M{"Chunks found?"}
         M -->|Yes| N["RAG Prompt Construction"]
         M -->|No| O["Grounded Fallback"]
-        N --> P["Gemini 2.5 Flash (Streaming)"]
+        N --> P["Gemini 3.7 Flash (Streaming with Fallbacks)"]
         P --> Q["Answer + Source Citations"]
     end
 
@@ -66,7 +66,7 @@ graph TD
 | Styling | Tailwind CSS v4 |
 | Components | shadcn/ui + Lucide React |
 | Embeddings | Google Gemini (`gemini-embedding-001`) |
-| Generation | Google Gemini (`gemini-3.6-flash`) |
+| Generation | Google Gemini (`gemini-3.7-flash` with fallbacks) |
 | Database | MongoDB Atlas |
 | Vector Search | MongoDB Atlas Vector Search |
 | SDK | `@google/genai` |
@@ -85,7 +85,7 @@ GEMINI_API_KEY=your-api-key-here
 
 The project uses two Gemini capabilities:
 - **`gemini-embedding-001`** — generates 768-dimensional embeddings for semantic search
-- **`gemini-3.6-flash`** — generates streaming answers from retrieved context
+- **`gemini-3.7-flash`** — generates streaming answers from retrieved context (with automatic fallback to `gemini-3.5-flash` or `gemini-3.6-flash`)
 
 ---
 
@@ -93,7 +93,7 @@ The project uses two Gemini capabilities:
 
 1. Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/atlas)
 2. Create a database user
-3. Whitelist your IP
+3. Whitelist your IP (for production deployments like Vercel, allow `0.0.0.0/0` under Network Access to support dynamic serverless IPs)
 4. Get the connection string and add to `.env.local`:
 
 ```env
@@ -199,7 +199,7 @@ knowledge/
 └── faq.md            # Common questions
 ```
 
-Each file contains `[PLACEHOLDER]` markers that should be replaced with real information. The filename (without `.md`) becomes the chunk's `category` metadata.
+Each file contains verified facts about Muhammad Zohaib's education, live projects, experience, skills, and contact channels. The filename (without `.md`) becomes the chunk's `category` metadata.
 
 ---
 
@@ -236,9 +236,8 @@ npm start
 ```
 
 Visit:
-- **Landing page**: http://localhost:3000
-- **Chat**: http://localhost:3000/chat
-- **Admin**: http://localhost:3000/admin
+- **Chat Interface**: http://localhost:3000
+- **Admin Dashboard**: http://localhost:3000/admin
 
 ---
 
@@ -399,10 +398,10 @@ All RAG parameters are centralized in `lib/config.ts`:
 |-----------|---------|-------------|
 | `embedding.model` | `gemini-embedding-001` | Embedding model |
 | `embedding.dimensions` | `768` | Output vector dimensions |
-| `generation.model` | `gemini-3.6-flash` | Generation model |
+| `generation.model` | `gemini-3.7-flash` | Generation model |
 | `chunking.chunkSize` | `800` | Target chunk size (chars) |
 | `chunking.chunkOverlap` | `200` | Overlap between chunks |
-| `retrieval.topK` | `5` | Number of chunks to retrieve |
+| `retrieval.topK` | `8` | Number of chunks to retrieve |
 | `retrieval.similarityThreshold` | `0.65` | Minimum similarity score |
 | `mongodb.database` | `ask-my-twin` | Database name |
 | `mongodb.collection` | `chunks` | Collection name |
