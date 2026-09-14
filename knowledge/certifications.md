@@ -11,7 +11,7 @@
 
 ## Third-Party Industry Certifications
 
-- **Status:** [PLACEHOLDER: No separate external vendor certifications (e.g. AWS Certified, GCP Certified) are claimed. Technical skills are verified through academic degree, 1.5+ years commercial experience, and live deployed client web systems.]
+- **Status:** [PLACEHOLDER: No separate external vendor certifications (e.g. AWS Certified, GCP Certified) are claimed. Technical skills are verified through academic degree, 2.5+ years commercial experience, and live deployed client web systems.]
 
 ---
 

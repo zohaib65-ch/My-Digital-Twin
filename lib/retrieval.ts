@@ -20,16 +20,16 @@ import type { RetrievedChunk } from './types';
  * category-specific keywords before a filter is applied.
  */
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  skills: ['skill', 'skills', 'technology', 'technologies', 'tech stack', 'programming language', 'framework', 'tools'],
-  projects: ['project', 'projects', 'portfolio', 'built', 'developed', 'application'],
-  experience: ['experience', 'work experience', 'job', 'career', 'company', 'position', 'employment'],
-  services: ['service', 'services', 'offer', 'provides', 'consulting', 'freelance', 'hire'],
-  education: ['education', 'degree', 'university', 'college', 'studied', 'graduated'],
-  certifications: ['certification', 'certifications', 'certified', 'certificate', 'credential'],
-  achievements: ['achievement', 'achievements', 'award', 'awards', 'recognition'],
-  contact: ['contact', 'email', 'phone', 'linkedin', 'github', 'reach out'],
-  personal: ['who is', 'about zohaib', 'introduction', 'bio', 'background'],
-  faq: ['faq', 'frequently asked'],
+  skills: ['skill', 'skills', 'technology', 'technologies', 'tech stack', 'programming language', 'framework', 'tools', 'hunar', 'maharat', 'مهارت'],
+  projects: ['project', 'projects', 'portfolio', 'built', 'developed', 'application', 'kam kia', 'kaam kiya', 'منصوبے'],
+  experience: ['experience', 'work experience', 'job', 'career', 'company', 'position', 'employment', 'tajurba', 'naukri', 'تجربہ'],
+  services: ['service', 'services', 'offer', 'provides', 'consulting', 'freelance', 'hire', 'khidmat', 'خدمات'],
+  education: ['education', 'degree', 'university', 'college', 'studied', 'graduated', 'taleem', 'parhai', 'تعلیم'],
+  certifications: ['certification', 'certifications', 'certified', 'certificate', 'credential', 'sanad'],
+  achievements: ['achievement', 'achievements', 'award', 'awards', 'recognition', 'kamiyabi'],
+  contact: ['contact', 'email', 'phone', 'linkedin', 'github', 'reach out', 'rabta', 'رابطہ'],
+  personal: ['who is', 'about zohaib', 'introduction', 'bio', 'background', 'zohaib kon hai', 'urdu', 'roman urdu', 'zaban', 'language', 'languages', 'اردو', 'کون ہے'],
+  faq: ['faq', 'frequently asked', 'sawal', 'sawalat', 'سوال'],
 };
 
 /** Minimum keyword hits required to apply a category filter */

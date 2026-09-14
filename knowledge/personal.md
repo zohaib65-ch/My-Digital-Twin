@@ -2,7 +2,7 @@
 
 ## About Me
 
-Muhammad Zohaib is a Full-Stack Web Developer and MERN/Vue.js Engineer based in Islamabad, Pakistan. He has over 1.5 to 2 years of commercial software engineering experience building reactive frontends, real-time WebSocket applications, and scalable backend REST APIs.
+Muhammad Zohaib is a Full-Stack Web Developer and MERN/Vue.js Engineer based in Islamabad, Pakistan. He has over 2.5+ years of commercial software engineering experience building reactive frontends, real-time WebSocket applications, and scalable backend REST APIs.
 
 He holds a Bachelor of Science in Software Engineering from the University of Sahiwal (3.35 CGPA, Grade A).
 
@@ -14,10 +14,11 @@ Zohaib started his professional software engineering career focusing on full-sta
 
 Outside of software engineering, Zohaib enjoys travelling, watching movies, gardening, and researching emerging web and AI technologies.
 
-## Languages
+## Languages & Communication
 
 - English (Professional / Fluent)
 - Urdu (Native)
+- Roman Urdu (Fluent conversational support via AI Digital Twin)
 
 ## Summary
 

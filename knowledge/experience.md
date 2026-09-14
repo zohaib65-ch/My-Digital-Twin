@@ -50,4 +50,4 @@
 
 ## Career Summary
 
-Muhammad Zohaib has over 1.5 to 2 years of professional software development experience spanning on-site software houses and international remote freelancing. His background covers the entire development lifecycle, from interactive frontends in Vue.js and React to scalable backend APIs in Node.js/Express and MongoDB.
+Muhammad Zohaib has over 2.5+ years of professional software development experience spanning on-site software houses and international remote freelancing. His background covers the entire development lifecycle, from interactive frontends in Vue.js and React to scalable backend APIs in Node.js/Express and MongoDB.

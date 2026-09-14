@@ -2,7 +2,7 @@
 
 ## Who is Muhammad Zohaib?
 
-Muhammad Zohaib is a Full-Stack Web Developer and MERN/Vue.js Engineer based in Islamabad, Pakistan. He has over 1.5 to 2 years of professional software engineering experience building modern web applications, real-time socket-based platforms, and intuitive administrative dashboards.
+Muhammad Zohaib is a Full-Stack Web Developer and MERN/Vue.js Engineer based in Islamabad, Pakistan. He has over 2.5+ years of professional software engineering experience building modern web applications, real-time socket-based platforms, and intuitive administrative dashboards.
 
 ## What does Zohaib specialize in?
 
@@ -45,3 +45,8 @@ He graduated from the University of Sahiwal with a Bachelor of Science in Softwa
 ## What are Zohaib's personal interests and hobbies?
 
 Outside of software engineering, Zohaib enjoys travelling, watching movies, gardening, and researching emerging technologies.
+
+## What languages does Zohaib speak? Can his AI twin understand Urdu?
+
+Yes, Muhammad Zohaib is a native Urdu speaker and is fully fluent in English for professional and technical communication. His AI digital twin can understand and respond fluently in English, Urdu (اردو), and Roman Urdu.
+
